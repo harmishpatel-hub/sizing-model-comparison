@@ -1,3 +1,4 @@
+from src.score.model_score import model_score
 from src.charts.draw_tolerance_lines import draw_tolerance_lines
 from src.charts.update_traces import update_traces
 import streamlit as st
@@ -60,6 +61,8 @@ def main():
             fig = draw_unity(fig, 0, 90)
             fig = draw_tolerance_lines(fig, 0, 90, 10, unit="%")
             fig = update_traces(fig, 0, 90, "with ILI Predicted Dimensions", "Actual Depth (%)", "NN Depth (%)", 10)
+            nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], df_test['NN_Depth'])
+            st.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
             st.plotly_chart(fig)
 
     st.subheader("Predicted depth Data - Neural Network (on Actual Dimensions)")
@@ -87,6 +90,8 @@ def main():
             fig = draw_unity(fig, 0, 90)
             fig = draw_tolerance_lines(fig, 0, 90, 10, unit="%")
             fig = update_traces(fig, 0, 90, "with Actual Dimensions", "Actual Depth (%)", "NN Depth (%)", 10)
+            nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], parsed_df['NN_Depth'])
+            st.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
             st.plotly_chart(fig)
 
     
