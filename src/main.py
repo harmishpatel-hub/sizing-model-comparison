@@ -1,9 +1,10 @@
 from src.charts.draw_tolerance_lines import draw_tolerance_lines
 from src.charts.update_traces import update_traces
 import streamlit as st
-from src.dataset_preprocessing import read_excel
+from src.dataset_preprocessing import parsed_data, read_excel
 from src.dataset_preprocessing import filter_columns
 from src.dataset_preprocessing import preprocess_shape_depth
+from src.dataset_preprocessing import preprocess_length_width
 from src.read_model import read_model
 from sklearn.preprocessing import LabelEncoder
 import plotly.graph_objects as go
@@ -27,54 +28,66 @@ def main():
         df = read_excel(READ_EXCEL_FILES)
         # st.dataframe(df)
         data = preprocess_shape_depth(df)
-        st.dataframe(data)
-        columns = ['ML Class', 'Ext/Int', 'Length [in]', 'Width [in]', 'WT [in]', 'Peak Value', 'Speed [ft/s]', '% Depth']
-        filtered_df = filter_columns(data, columns)
-        df_test = filtered_df.rename(
-            columns={
-                'ML Class': 'ml_class', 
-                'Length [in]': 'length', 
-                'Width [in]': 'width', 
-                'WT [in]': 'wt', 
-                'Peak Value': 'peak_value',
-                'Speed [ft/s]': 'speed',
-                '% Depth': 'depth_old'
-                }
-            )
-        old_depth = df_test['depth_old']
-        df_test.drop('depth_old', axis=1, inplace=True)
-        df_test['Ext/Int'] = df_test['Ext/Int'].apply(lambda x: 1 if x=='External' else 0)
-        le = LabelEncoder()
-        df_test['ml_class'] = le.fit_transform(df_test['ml_class'])
-        # st.dataframe(df_test)
-        # st.dataframe(filtered_df)
+        # st.dataframe(data)
+        
 
     select_model = st.sidebar.selectbox("Select Model:", options=['16in', '24in'])
     if select_model:
         READ_MODEL_FILE = f"./onnx_models/{select_model}/"
         nn_model = read_model(READ_MODEL_FILE)
 
+    st.subheader("Predicted depth Data - Neural Network (on ILI Dimenstion)")
+    predict_depths = st.checkbox("Predict the Depths (Using Neural Network Model):")
+    if predict_depths:
+        df_test = parsed_data(data)
         nn_depth = nn_model.predict(df_test)
         df_test['Shape'] = data['Shape']
         df_test['Actual Depth'] = data['Actual Depth']
         df_test['NN_Depth'] = nn_depth
         df_test['NN_Depth'] = df_test['NN_Depth'].apply(lambda x: depth_range(x))
+        
         st.dataframe(df_test)
-    
-    unity_plot = st.checkbox("Show Unity Plots:")
-    if unity_plot:
-        fig = go.Figure()
-        fig.add_trace(
-            go.Scatter(
-                x = data['Actual Depth'],
-                y = df_test['NN_Depth'],
-                mode = 'markers',
-                showlegend = False
-        ))
-        fig = draw_unity(fig, 0, 90)
-        fig = draw_tolerance_lines(fig, 0, 90, 10, unit="%")
-        fig = update_traces(fig, 0, 90, "", "Actual Depth (%)", "NN_Depth", 10)
-        st.plotly_chart(fig)
+        unity_plot = st.checkbox("Show Unity Plots:", key="ILI")
+        if unity_plot:
+            fig = go.Figure()
+            fig.add_trace(
+                go.Scatter(
+                    x = data['Actual Depth'],
+                    y = df_test['NN_Depth'],
+                    mode = 'markers',
+                    showlegend = False
+            ))
+            fig = draw_unity(fig, 0, 90)
+            fig = draw_tolerance_lines(fig, 0, 90, 10, unit="%")
+            fig = update_traces(fig, 0, 90, "with ILI Predicted Dimensions", "Actual Depth (%)", "NN Depth (%)", 10)
+            st.plotly_chart(fig)
+
+    st.subheader("Predicted depth Data - Neural Network (on Actual Dimensions)")
+    retrieve_actual_dimensions = st.checkbox("Retrieve Actual Dimensions:")
+    if retrieve_actual_dimensions:
+        replaced_length_width_data = preprocess_length_width(data)
+        parsed_df = parsed_data(replaced_length_width_data)
+        nn_depth = nn_model.predict(parsed_df)
+        parsed_df['Shape'] = data['Shape']
+        parsed_df['Actual Depth'] = data['Actual Depth']
+        parsed_df['NN_Depth'] = nn_depth
+        parsed_df['NN_Depth'] = parsed_df['NN_Depth'].apply(lambda x: depth_range(x))
+        
+        st.dataframe(parsed_df)
+        unity_plot = st.checkbox("Show Unity Plots:", key="actual")
+        if unity_plot:
+            fig = go.Figure()
+            fig.add_trace(
+                go.Scatter(
+                    x = data['Actual Depth'],
+                    y = parsed_df['NN_Depth'],
+                    mode = 'markers',
+                    showlegend = False
+            ))
+            fig = draw_unity(fig, 0, 90)
+            fig = draw_tolerance_lines(fig, 0, 90, 10, unit="%")
+            fig = update_traces(fig, 0, 90, "with Actual Dimensions", "Actual Depth (%)", "NN Depth (%)", 10)
+            st.plotly_chart(fig)
 
     
 
