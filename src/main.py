@@ -1,3 +1,5 @@
+from src.charts.unity_figure import unity_plot
+from src.dataset_postprocessing import post_processing
 from src.score.model_score import model_score
 from src.charts.draw_tolerance_lines import draw_tolerance_lines
 from src.charts.update_traces import update_traces
@@ -11,17 +13,8 @@ import streamlit as st
 import numpy as np
 import xgboost as xgb
 
-
-
 st.set_page_config(layout="wide")
 
-def depth_range(x):
-    if x < 10:
-        return 10
-    elif x > 80:
-        return 80
-    else:
-        return round(x)
 
 def main():
     pipe_size = st.sidebar.selectbox("Select Pipe Size[in]:", options=[3,16,24])
@@ -45,137 +38,79 @@ def main():
         xgboost_model = read_xgboost_model(READ_XGBOOST_MODEL_FILE)
 
     col1, col2 = st.columns(2)
+    ### ILI PREDICTED DIMENSION
     with col1:
-        st.subheader("Predicted Depth Data - (on ILI Dimensions)")
-        predict_depths = st.checkbox("Predict the Depths (Using Neural Network Model):")
+        st.subheader("Predicted Depth - (ILI Dimensions)")
+        predict_depths = st.checkbox("Predict the Depths with NN (ILI Dimensions):")
         if predict_depths:
             df_test = parsed_data(data)
-            nn_depth = xgboost_model.predict(df_test)
-            df_test['Shape'] = data['Shape']
-            df_test['Actual Depth'] = data['Actual Depth']
-            df_test['NN_Depth'] = nn_depth
-            df_test['NN_Depth'] = df_test['NN_Depth'].apply(lambda x: depth_range(x))
-            df_test['Depth Difference'] = abs(df_test['Actual Depth'] - df_test['NN_Depth']) 
+            nn_depth = nn_model.predict(df_test)
+            df_test = post_processing(df_test, data, "NN", nn_depth)
             within_spec = len(df_test[df_test['Depth Difference']<=10])
             st.dataframe(df_test)
-            unity_plot = st.checkbox("Show Unity Plots:", key="ILI")
-            if unity_plot:
-                fig = go.Figure()
-                fig.add_trace(
-                    go.Scatter(
-                        x = data['Actual Depth'],
-                        y = df_test['NN_Depth'],
-                        mode = 'markers',
-                        showlegend = False
-                ))
-                fig = draw_unity(fig, 0, 90)
-                fig = draw_tolerance_lines(fig, 0, 90, 10, unit="%")
-                fig = update_traces(fig, 0, 90, "with ILI Predicted Dimensions", "Actual Depth (%)", "NN Depth (%)", 10)
-                # st.write(f"Total: {len(df_test)}")
+            unity_plot_checkbox = st.checkbox("Show Unity Plots (NN):", key="ILI")
+            if unity_plot_checkbox:
+                fig = unity_plot(df_test, data, "NN", "ILI Predicted Dimensions")
+
                 st.markdown(f"Total: {len(df_test)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%")
                 st.write()
-                nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], df_test['NN_Depth'])
+                nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], df_test['NN Depth'])
                 st.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
                 st.plotly_chart(fig)
         
-        xgboost_depths = st.checkbox("Predict the Depths (Using XGBoost Model):")
+        xgboost_depths = st.checkbox("Predict the Depths with XGBoost (ILI Dimensions):")
         if xgboost_depths:
             df_test = parsed_data(data)
             df_t = xgb.DMatrix(df_test)
             xgb_depth = xgboost_model.predict(df_t)
-            df_test['Shape'] = data['Shape']
-            df_test['Actual Depth'] = data['Actual Depth']
-            df_test['XGB_Depth'] = xgb_depth
-            df_test['XGB_Depth'] = df_test['XGB_Depth'].apply(lambda x: depth_range(x))
-            df_test['Depth Difference'] = abs(df_test['Actual Depth'] - df_test['XGB_Depth']) 
+            df_test = post_processing(df_test, data, "XGB", xgb_depth)
             within_spec = len(df_test[df_test['Depth Difference']<=10])
             st.dataframe(df_test)
-            unity_plot = st.checkbox("Show Unity Plots:", key="ILI_xgb")
-            if unity_plot:
-                fig = go.Figure()
-                fig.add_trace(
-                    go.Scatter(
-                        x = data['Actual Depth'],
-                        y = df_test['XGB_Depth'],
-                        mode = 'markers',
-                        showlegend = False
-                ))
-                fig = draw_unity(fig, 0, 90)
-                fig = draw_tolerance_lines(fig, 0, 90, 10, unit="%")
-                fig = update_traces(fig, 0, 90, "with ILI Predicted Dimensions", "Actual Depth (%)", "XGB Depth (%)", 10)
-                # st.write(f"Total: {len(df_test)}")
+            unity_plot_checkbox = st.checkbox("Show Unity Plots (XGBOOST):", key="ILI_xgb")
+            if unity_plot_checkbox:
+                fig = unity_plot(df_test, data, "XGB", "Actual Dimensions")
                 st.markdown(f"Total: {len(df_test)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%")
                 st.write()
-                nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], df_test['XGB_Depth'])
+                nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], df_test['XGB Depth'])
                 st.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
                 st.plotly_chart(fig)
 
-
+    ### ACTUAL DIMENSION
     with col2:
-        st.subheader("Predicted Depth Data - (on Actual Dimensions)")
-        retrieve_actual_dimensions = st.checkbox("Retrieve Actual Dimensions:")
+        st.subheader("Predicted Depth - (Actual Dimensions)")
+        retrieve_actual_dimensions = st.checkbox("Predict the Depths with NN (Actual Dimensions):")
         if retrieve_actual_dimensions:
             replaced_length_width_data = preprocess_length_width(data)
             parsed_df = parsed_data(replaced_length_width_data)
             nn_depth = nn_model.predict(parsed_df)
-            parsed_df['Shape'] = data['Shape']
-            parsed_df['Actual Depth'] = data['Actual Depth']
-            parsed_df['NN_Depth'] = nn_depth
-            parsed_df['NN_Depth'] = parsed_df['NN_Depth'].apply(lambda x: depth_range(x))
-            parsed_df['Depth Difference'] = abs(parsed_df['Actual Depth'] - parsed_df['NN_Depth']) 
+            parsed_df = post_processing(parsed_df, data, "NN", nn_depth)
             within_spec = len(parsed_df[parsed_df['Depth Difference']<=10])
             st.dataframe(parsed_df)
-            unity_plot = st.checkbox("Show Unity Plots:", key="Actual")
-            if unity_plot:
-                fig = go.Figure()
-                fig.add_trace(
-                    go.Scatter(
-                        x = data['Actual Depth'],
-                        y = parsed_df['NN_Depth'],
-                        mode = 'markers',
-                        showlegend = False
-                ))
-                fig = draw_unity(fig, 0, 90)
-                fig = draw_tolerance_lines(fig, 0, 90, 10, unit="%")
-                fig = update_traces(fig, 0, 90, "with Actual Dimensions", "Actual Depth (%)", "NN Depth (%)", 10)
+            unity_plot_checkbox = st.checkbox("Show Unity Plots (NN):", key="Actual")
+            if unity_plot_checkbox:
+                fig = unity_plot(parsed_df, data, "NN", "Actual Dimensions")
                 st.markdown(f"Total: {len(parsed_df)} defects \n\n Within 10% Tolerance:{within_spec} -- {round((within_spec/len(parsed_df))*100,2)}%")
-
                 # st.write()
-                nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], parsed_df['NN_Depth'])
+                nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], parsed_df['NN Depth'])
                 st.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
                 st.plotly_chart(fig)
 
-        xgboost_depths = st.checkbox("Predict the Depths (Using XGBoost Model):", key="Actual_XGB_pred")
+        xgboost_depths = st.checkbox("Predict the Depths with XGBoost (Actual Dimensions):")
         if xgboost_depths:
             replaced_length_width_data = preprocess_length_width(data)
             parsed_df = parsed_data(replaced_length_width_data)
             df_p = xgb.DMatrix(parsed_df)
             xgb_depth = xgboost_model.predict(df_p)
-            # xgb_depth = xgboost_model.predict(parsed_df)
-            parsed_df['Shape'] = data['Shape']
-            parsed_df['Actual Depth'] = data['Actual Depth']
-            parsed_df['XGB_Depth'] = xgb_depth
-            parsed_df['XGB_Depth'] = parsed_df['XGB_Depth'].apply(lambda x: depth_range(x))
-            parsed_df['Depth Difference'] = abs(parsed_df['Actual Depth'] - parsed_df['XGB_Depth']) 
+            parsed_df = post_processing(parsed_df, data, "XGB", xgb_depth)
             within_spec = len(parsed_df[parsed_df['Depth Difference']<=10])
             st.dataframe(parsed_df)
-            unity_plot = st.checkbox("Show Unity Plots:", key="Actual_xgb")
-            if unity_plot:
-                fig = go.Figure()
-                fig.add_trace(
-                    go.Scatter(
-                        x = data['Actual Depth'],
-                        y = parsed_df['XGB_Depth'],
-                        mode = 'markers',
-                        showlegend = False
-                ))
-                fig = draw_unity(fig, 0, 90)
-                fig = draw_tolerance_lines(fig, 0, 90, 10, unit="%")
-                fig = update_traces(fig, 0, 90, "with ILI Predicted Dimensions", "Actual Depth (%)", "XGB Depth (%)", 10)
+            unity_plot_checkbox = st.checkbox("Show Unity Plots (XGBOOST):", key="Actual_xgb")
+            if unity_plot_checkbox:
+                fig = unity_plot(parsed_df, data, "XGB", "Actual Dimensions")
                 # st.write(f"Total: {len(df_test)}")
                 st.markdown(f"Total: {len(parsed_df)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(parsed_df)*100)}%")
                 st.write()
-                nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], parsed_df['XGB_Depth'])
+                nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], parsed_df['XGB Depth'])
                 st.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
                 st.plotly_chart(fig)
 
