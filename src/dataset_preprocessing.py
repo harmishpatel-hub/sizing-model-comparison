@@ -63,6 +63,11 @@ def preprocess_length_width(df):
                                         x['WT [in]']), axis=1)
     return df
 
+def labelEncoding(data, colToEncode):
+    le = LabelEncoder()
+    data[colToEncode] = le.fit_transform(data[colToEncode])
+    return data
+
 def parsed_data(df):
     columns = ['ML Class', 'Ext/Int', 'Length [in]', 'Width [in]', 'WT [in]', 'Peak Value', 'Speed [ft/s]', '% Depth']
     filtered_df = filter_columns(df, columns)
@@ -80,9 +85,7 @@ def parsed_data(df):
     old_depth = df_test['depth_old']
     df_test.drop('depth_old', axis=1, inplace=True)
     df_test['Ext/Int'] = df_test['Ext/Int'].apply(lambda x: 1 if x=='External' else 0)
-    le = LabelEncoder()
-    df_test['ml_class'] = le.fit_transform(df_test['ml_class'])
+    df_test = labelEncoding(df_test, 'ml_class')
     # st.dataframe(df_test)
     return df_test
 
-  
