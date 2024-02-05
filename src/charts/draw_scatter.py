@@ -18,7 +18,7 @@ def drawPhysicsChart(dataframe, colX, colY, colColor, tick=5):
         | EXT/INT = {'EXTERNAL' if dataframe['Ext/Int'].unique()[0] == 1 else 'INTERNAL'} 
         | PEAK VALUE={dataframe['peak_value'].unique()[0]}""",
         width = 1500,
-        height = 1200,
+        height = 1100,
         xaxis_title = f"{colX.upper()}",
         yaxis_title = f"{colY.upper()} [%]",
         xaxis = dict(dtick = 0.05),
