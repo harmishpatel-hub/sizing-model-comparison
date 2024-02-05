@@ -1,4 +1,4 @@
-def update_traces(fig, start, end, string, col1, col2, tick):
+def update_traces(fig, start, end, string, col1, col2, tick, plotWidth, plotHeight):
     fig.update_xaxes(range=[start, end], showticklabels=True)
     fig.update_yaxes(range=[start, end], showticklabels=True)
     fig.update_traces(
@@ -9,8 +9,8 @@ def update_traces(fig, start, end, string, col1, col2, tick):
         )
     fig.update_layout(
         title = f'Unity Plot - {string} ',
-        width = 1000,
-        height = 800,
+        width = plotWidth,
+        height = plotHeight,
         xaxis_title = f'{col1}',
         yaxis_title = f'{col2}',
         xaxis = dict(
