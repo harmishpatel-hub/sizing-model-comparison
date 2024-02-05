@@ -19,7 +19,7 @@ def drawPhysicsChart(dataframe, colX, colY, colColor, tick=5):
         | PEAK VALUE={dataframe['peak_value'].unique()[0]}""",
         width = 1500,
         height = 1100,
-        xaxis_title = f"{colX.upper()}",
+        xaxis_title = f"{colX.upper()} [in]",
         yaxis_title = f"{colY.upper()} [%]",
         xaxis = dict(dtick = 0.05),
         yaxis = dict(
