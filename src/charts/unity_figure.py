@@ -14,7 +14,11 @@ def unity_plot(df, data, model_used, title_string, actual_depth="Actual Depth"):
             x = data[actual_depth],
             y = df[f"{model_used} Depth"],
             mode = "markers",
-            showlegend= False
+            showlegend= False,
+            # hovertemplate='Item 3#: %{data['']}'
+            hovertext = data['Item #'],
+            hoverlabel=dict(namelength=0),
+            hovertemplate='Item # %{hovertext}'
         )
     )
     fig = draw_unity(fig, start, end)
