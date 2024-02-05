@@ -23,5 +23,9 @@ def unity_plot(df, data, model_used, title_string, actual_depth="Actual Depth"):
     )
     fig = draw_unity(fig, start, end)
     fig = draw_tolerance_lines(fig, start, end, tolerance, unit="%")
-    fig = update_traces(fig, start, end, title_string, f"{actual_depth} (%)", f"{model_used} Depth (%)", 10)
+    fig = update_traces(fig, start, end, 
+                        string=title_string, 
+                        col1=f"{actual_depth} (%)", 
+                        col2=f"{model_used} Depth (%)", 
+                        tick=10, plotWidth=1000, plotHeight=800)
     return fig

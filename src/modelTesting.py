@@ -1,5 +1,6 @@
 import streamlit as st
 import xgboost as xgb
+from src.charts.draw_mlClassUnity import mlClassUnity
 from src.charts.unity_figure import unity_plot
 from src.dataset_postprocessing import post_processing
 
@@ -34,76 +35,117 @@ def modelTestingFilter():
         st.subheader("Predicted Depth - (ILI Dimensions)")
         predict_depths = st.checkbox("Predict the Depths with NN (ILI Dimensions):")
         if predict_depths:
-            tab1, tab2, tab3 = st.tabs(["📈 Unity Plot", "📊 Statistics", "💾 Data"])
+            tab1, tab2, tab3, tab4 = st.tabs(["📈 Unity Plot", "💹 ML Class Unity Plot", "📊 Statistics", "💾 Data"])
             df_test = parsed_data(data)
             nn_depth = nn_model.predict(df_test)
             df_test = post_processing(df_test, data, "NN", nn_depth)
             within_spec = len(df_test[df_test['Depth Difference']<=10])
-            tab3.dataframe(df_test)
-            # unity_plot_checkbox = st.checkbox("Show Unity Plots (NN):", key="ILI")
-            # if unity_plot_checkbox:
+            tab4.dataframe(df_test)
+          
             fig = unity_plot(df_test, data, "NN", "ILI Predicted Dimensions")
-            tab2.markdown(f"Total: {len(df_test)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%")
+            # mlClassUnityFigList = mlClassUnity(data=df_test, colMLClass="ml_class", model_used="NN", title_string="ILI Predicted Dimensions")
+            mlClassUnityFigList, mlClassStats = mlClassUnity(data=df_test, 
+                                               colMLClass="ml_class", 
+                                               model_used="NN", 
+                                               title_string="ILI Predicted Dimensions")
+            tab3.markdown(f"Total: {len(df_test)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%")
             # st.write()
             nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], df_test['NN Depth'])
-            tab2.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
+            tab3.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
             tab1.plotly_chart(fig)
+            for i in mlClassUnityFigList:
+                tab2.plotly_chart(mlClassUnityFigList[i])
+            for i in mlClassStats:
+                tab3.divider()
+                tab3.subheader(i)
+                tab3.write(f"\n\n {mlClassStats[i]}")
+                
+                
         
         xgboost_depths = st.checkbox("Predict the Depths with XGBoost (ILI Dimensions):")
         if xgboost_depths:
-            tab1, tab2, tab3 = st.tabs(["📈 Unity Plot", "📊 Statistics", "💾 Data"])
+            tab1, tab2, tab3, tab4 = st.tabs(["📈 Unity Plot", "💹 ML Class Unity Plot", "📊 Statistics", "💾 Data"])
             df_test = parsed_data(data)
             df_t = xgb.DMatrix(df_test)
             xgb_depth = xgboost_model.predict(df_t)
             df_test = post_processing(df_test, data, "XGB", xgb_depth)
             within_spec = len(df_test[df_test['Depth Difference']<=10])
-            tab3.dataframe(df_test)
-            # unity_plot_checkbox = st.checkbox("Show Unity Plots (XGBOOST):", key="ILI_xgb")
-            # if unity_plot_checkbox:
+            tab4.dataframe(df_test)
+            
             fig = unity_plot(df_test, data, "XGB", "ILI Predicted Dimensions")
-            tab2.markdown(f"Total: {len(df_test)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%")
+            # mlClassUnityFigList = mlClassUnity(data=df_test, colMLClass="ml_class", model_used="XGB", title_string="ILI Predicted Dimensions")
+            mlClassUnityFigList, mlClassStats = mlClassUnity(data=df_test, 
+                                               colMLClass="ml_class", 
+                                               model_used="XGB", 
+                                               title_string="ILI Predicted Dimensions")
+            tab3.markdown(f"Total: {len(df_test)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%")
             # st.write()
             nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], df_test['XGB Depth'])
-            tab2.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
+            tab3.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
             tab1.plotly_chart(fig)
+            for i in mlClassUnityFigList:
+                tab2.plotly_chart(mlClassUnityFigList[i])
+            for i in mlClassStats:
+                tab3.divider()
+                tab3.subheader(i)
+                tab3.write(f"\n\n {mlClassStats[i]}")
 
     ### ACTUAL DIMENSION
     with col2:
         st.subheader("Predicted Depth - (Actual Dimensions)")
         retrieve_actual_dimensions = st.checkbox("Predict the Depths with NN (Actual Dimensions):")
         if retrieve_actual_dimensions:
-            tab1, tab2, tab3 = st.tabs(["📈 Unity Plot", "📊 Statistics", "💾 Data"])
+            tab1, tab2, tab3, tab4 = st.tabs(["📈 Unity Plot", "💹 ML Class Unity Plot", "📊 Statistics", "💾 Data"])
             replaced_length_width_data = preprocess_length_width(data)
             parsed_df = parsed_data(replaced_length_width_data)
             nn_depth = nn_model.predict(parsed_df)
             parsed_df = post_processing(parsed_df, data, "NN", nn_depth)
             within_spec = len(parsed_df[parsed_df['Depth Difference']<=10])
-            tab3.dataframe(parsed_df)
-            # unity_plot_checkbox = st.checkbox("Show Unity Plots (NN):", key="Actual")
-            # if unity_plot_checkbox:
+            tab4.dataframe(parsed_df)
+
             fig = unity_plot(parsed_df, data, "NN", "Actual Dimensions")
-            tab2.markdown(f"Total: {len(parsed_df)} defects \n\n Within 10% Tolerance:{within_spec} -- {round((within_spec/len(parsed_df))*100,2)}%")
+            mlClassUnityFigList, mlClassStats = mlClassUnity(data=parsed_df, 
+                                               colMLClass="ml_class", 
+                                               model_used="NN", 
+                                               title_string="Actual Dimensions")
+            
+            tab3.markdown(f"Total: {len(parsed_df)} defects \n\n Within 10% Tolerance:{within_spec} -- {round((within_spec/len(parsed_df))*100,2)}%")
             # st.write()
             nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], parsed_df['NN Depth'])
-            tab2.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
+            tab3.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
+            
             tab1.plotly_chart(fig)
+            for i in mlClassUnityFigList:
+                tab2.plotly_chart(mlClassUnityFigList[i])
+            for i in mlClassStats:
+                tab3.divider()
+                tab3.subheader(i)
+                tab3.write(f"\n\n {mlClassStats[i]}")
 
         xgboost_depths = st.checkbox("Predict the Depths with XGBoost (Actual Dimensions):")
         if xgboost_depths:
-            tab1, tab2, tab3 = st.tabs(["📈 Unity Plot", "📊 Statistics", "💾 Data"])
+            tab1, tab2, tab3, tab4 = st.tabs(["📈 Unity Plot", "💹 ML Class Unity Plot", "📊 Statistics", "💾 Data"])
             replaced_length_width_data = preprocess_length_width(data)
             parsed_df = parsed_data(replaced_length_width_data)
             df_p = xgb.DMatrix(parsed_df)
             xgb_depth = xgboost_model.predict(df_p)
             parsed_df = post_processing(parsed_df, data, "XGB", xgb_depth)
             within_spec = len(parsed_df[parsed_df['Depth Difference']<=10])
-            tab3.dataframe(parsed_df)
-            # unity_plot_checkbox = st.checkbox("Show Unity Plots (XGBOOST):", key="Actual_xgb")
-            # if unity_plot_checkbox:
+            tab4.dataframe(parsed_df)
             fig = unity_plot(parsed_df, data, "XGB", "Actual Dimensions")
-            # st.write(f"Total: {len(df_test)}")
-            tab2.markdown(f"Total: {len(parsed_df)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(parsed_df)*100)}%")
+            mlClassUnityFigList, mlClassStats = mlClassUnity(data=parsed_df, 
+                                               colMLClass="ml_class", 
+                                               model_used="XGB", 
+                                               title_string="Actual Dimensions")
+            tab3.markdown(f"Total: {len(parsed_df)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(parsed_df)*100)}%")
             # st.write()
             nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], parsed_df['XGB Depth'])
-            tab2.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
+            tab3.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
             tab1.plotly_chart(fig)
+            for i in mlClassUnityFigList:
+                tab2.plotly_chart(mlClassUnityFigList[i])
+            
+            for i in mlClassStats:
+                tab3.divider()
+                tab3.subheader(i)
+                tab3.write(f"\n\n {mlClassStats[i]}")
