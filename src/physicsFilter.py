@@ -77,8 +77,3 @@ def physics():
         fig.update_yaxes(range=[5, 85], showticklabels=True)
         tab1.plotly_chart(fig)
         tab2.write(dimensionDF)
-    
-
-
-
-
