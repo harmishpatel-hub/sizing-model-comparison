@@ -10,11 +10,11 @@ def drawPhysicsChart(dataframe, colX, colY, tick=5):
         )
     )
     fig.update_layout(
-        title = f"{colX} [in] VS {colY} [%]",
+        title = f"{colX.upper()} [in] VS {colY.upper()} [%]",
         width = 1000,
         height = 800,
-        xaxis_title = f"{colX}",
-        yaxis_title = f"{colY} [%]",
+        xaxis_title = f"{colX.upper()}",
+        yaxis_title = f"{colY.upper()} [%]",
         xaxis = dict(dtick = 0.05),
         yaxis = dict(
             tick0 = tick,
