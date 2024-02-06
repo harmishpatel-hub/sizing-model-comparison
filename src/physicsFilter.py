@@ -7,8 +7,8 @@ from src.datasetCreation.createDataframe import create_df
 from src.read_model import read_model, read_xgboost_model
 import pandas as pd
 
-def physics():
-    select_model = st.sidebar.selectbox("Select Neural Network Model:", options=['3in', '16in', '24in'])
+def physics(ONNX_MODEL_OPTIONS):
+    select_model = st.sidebar.selectbox("Select Neural Network Model:", options=ONNX_MODEL_OPTIONS)
     if select_model:
         READ_NEURAL_NETWORK_MODEL = f"./onnx_models/{select_model}"
         nnModel = read_model(READ_NEURAL_NETWORK_MODEL)

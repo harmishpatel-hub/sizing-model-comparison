@@ -35,7 +35,7 @@ def mlClassUnity(data,  colMLClass, model_used, title_string, actual_depth="Actu
             )
         )
         withinSpec = dataMLClass[dataMLClass['Depth Difference']<=10]
-        totalObservationsString = f"Total: {len(dataMLClass)} defects | Within 10% Tolerance: {len(withinSpec)} -- {round((len(withinSpec)/len(dataMLClass))*100,2)}%"
+        totalObservationsString = f"Total: {len(dataMLClass)} defects | Within ±10% Tolerance: {len(withinSpec)} -- {round((len(withinSpec)/len(dataMLClass))*100,2)}%"
 
         fig.add_annotation(
             x = 35,

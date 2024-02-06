@@ -39,7 +39,7 @@ def unity_plot(df, data, model_used, title_string, totalObservationsString, actu
     fig = draw_unity(fig, start, end)
     fig = draw_tolerance_lines(fig, start, end, tolerance, unit="%")
     fig = update_traces(fig, start, end, 
-                        string=title_string, 
+                        string=f"{title_string} with {model_used}", 
                         col1=f"{actual_depth} (%)", 
                         col2=f"{model_used} Depth (%)", 
                         tick=10, plotWidth=1000, plotHeight=800)
