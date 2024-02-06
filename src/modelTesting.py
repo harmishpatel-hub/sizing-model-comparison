@@ -1,5 +1,7 @@
 import streamlit as st
 import xgboost as xgb
+import os
+from src.component.downloadPDF import downloadPDF
 from src.charts.draw_mlClassUnity import mlClassUnity
 from src.charts.unity_figure import unity_plot
 from src.dataset_postprocessing import post_processing
@@ -8,23 +10,25 @@ from src.dataset_preprocessing import parsed_data, preprocess_length_width, prep
 from src.read_model import read_model, read_xgboost_model
 from src.score.model_score import model_score 
 
-def modelTestingFilter():
-    pipe_size = st.sidebar.selectbox("Select Pipe Size[in]:", options=[3,16,24])
+def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MODEL_OPTIONS):
+    
+    # st.write(XGBOOST_MODEL_OPTIONS)
+    pipe_size = st.sidebar.selectbox("Select Pipe Size[in]:", options=PULLTEST_DATASET_OPTIONS)
 
     if pipe_size:
-        READ_EXCEL_FILES = f"./pulltest_dataset/{pipe_size}in/"
+        READ_EXCEL_FILES = f"./pulltest_dataset/{pipe_size}/"
         df = read_excel(READ_EXCEL_FILES)
         # st.dataframe(df)
         data = preprocess_shape_depth(df)
         # st.dataframe(data)
         
 
-    select_model = st.sidebar.selectbox("Select Neural Network Model:", options=['3in', '16in', '24in'])
+    select_model = st.sidebar.selectbox("Select Neural Network Model:", options=ONNX_MODEL_OPTIONS)
     if select_model:
         READ_MODEL_FILE = f"./onnx_models/{select_model}/"
         nn_model = read_model(READ_MODEL_FILE)
     
-    select_xgboost_model = st.sidebar.selectbox("Select XGBoost Model:", options=['3in', '16in', '24in'])
+    select_xgboost_model = st.sidebar.selectbox("Select XGBoost Model:", options=XGBOOST_MODEL_OPTIONS)
     if select_xgboost_model:
         READ_XGBOOST_MODEL_FILE = f"./onnx_models/xgboost_model/{select_xgboost_model}/"
         xgboost_model = read_xgboost_model(READ_XGBOOST_MODEL_FILE)
@@ -41,7 +45,7 @@ def modelTestingFilter():
             df_test = post_processing(df_test, data, "NN", nn_depth)
             within_spec = len(df_test[df_test['Depth Difference']<=10])
             tab4.dataframe(df_test)
-            totalObservationsString = f"Total: {len(df_test)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%"
+            totalObservationsString = f"Total: {len(df_test)} defects \n\n Within ±10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%"
             tab3.markdown(totalObservationsString)
             # st.write()
             nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], df_test['NN Depth'])
@@ -73,7 +77,7 @@ def modelTestingFilter():
             df_test = post_processing(df_test, data, "XGB", xgb_depth)
             within_spec = len(df_test[df_test['Depth Difference']<=10])
             tab4.dataframe(df_test)
-            totalObservationsString = f"Total: {len(df_test)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%"
+            totalObservationsString = f"Total: {len(df_test)} defects \n\n Within ±10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%"
             tab3.markdown(totalObservationsString)
             # st.write()
             nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], df_test['XGB Depth'])
@@ -105,7 +109,7 @@ def modelTestingFilter():
             parsed_df = post_processing(parsed_df, data, "NN", nn_depth)
             within_spec = len(parsed_df[parsed_df['Depth Difference']<=10])
             tab4.dataframe(parsed_df)
-            totalObservationsString = f"Total: {len(parsed_df)} defects | Within 10% Tolerance:{within_spec} -- {round((within_spec/len(parsed_df))*100,2)}%"
+            totalObservationsString = f"Total: {len(parsed_df)} defects | Within ±10% Tolerance:{within_spec} -- {round((within_spec/len(parsed_df))*100,2)}%"
             tab3.markdown(totalObservationsString)
             # st.write()
             nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], parsed_df['NN Depth'])
@@ -125,6 +129,13 @@ def modelTestingFilter():
                 tab3.divider()
                 tab3.subheader(i)
                 tab3.write(f"\n\n {mlClassStats[i]}")
+            # re = downloadPDF(mlClassUnityFigList, "Unity Plot", "Metal Loss")
+            # tab2.download_button(label="Export Charts",
+            #                      data=re.output('', dest='S').encode('latin-1'),
+            #                      file_name=f"Unity Plot.pdf",
+            #                      mime = 'application/octate_stream',
+            #                      key = 'pdf download'
+            #                     )
 
         xgboost_depths = st.checkbox("Predict the Depths with XGBoost (Actual Dimensions):")
         if xgboost_depths:
@@ -136,7 +147,7 @@ def modelTestingFilter():
             parsed_df = post_processing(parsed_df, data, "XGB", xgb_depth)
             within_spec = len(parsed_df[parsed_df['Depth Difference']<=10])
             tab4.dataframe(parsed_df)
-            totalObservationsString = f"Total: {len(parsed_df)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(parsed_df)*100)}%"
+            totalObservationsString = f"Total: {len(parsed_df)} defects \n\n Within ±10% Tolerance:{within_spec} -- {round(within_spec/len(parsed_df)*100)}%"
             tab3.markdown(totalObservationsString)
             # st.write()
             nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], parsed_df['XGB Depth'])
