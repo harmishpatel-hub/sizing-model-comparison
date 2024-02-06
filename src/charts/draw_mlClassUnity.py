@@ -34,6 +34,25 @@ def mlClassUnity(data,  colMLClass, model_used, title_string, actual_depth="Actu
                 # hovertemplate='Item # %{hovertext}'
             )
         )
+        withinSpec = dataMLClass[dataMLClass['Depth Difference']<=10]
+        totalObservationsString = f"Total: {len(dataMLClass)} defects | Within 10% Tolerance: {len(withinSpec)} -- {round((len(withinSpec)/len(dataMLClass))*100,2)}%"
+
+        fig.add_annotation(
+            x = 35,
+            y = 87,
+            text=f"<b>{totalObservationsString}<b>",
+            showarrow=False,
+            font=dict(
+                family="Courier New, monospace",
+                size=14,
+                color="#000000"
+                ),
+            bordercolor="#675c58",
+            borderwidth=1,
+            bgcolor="#eeeee4",
+            opacity=0.8
+        )
+
         fig = draw_unity(fig, start, end)
         fig = draw_tolerance_lines(fig, start, end, tolerance, unit="%")
         fig = update_traces(fig, start, end, 
@@ -44,7 +63,7 @@ def mlClassUnity(data,  colMLClass, model_used, title_string, actual_depth="Actu
                             plotWidth=800, 
                             plotHeight=600)
         
-        withinSpec = dataMLClass[dataMLClass['Depth Difference']<=10]
+        
         nn_mae, nn_mse, nn_rmse = model_score(dataMLClass[f"{actual_depth}"], dataMLClass[f"{model_used} Depth"])
         
         listOfStats[f"{mlClassEncoded[mlCLass]}"] = f"Total: {len(dataMLClass)} defects \n\n Within 10% Tolerance: {len(withinSpec)} -- {round((len(withinSpec)/len(dataMLClass))*100,2)}% \n\n Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}"

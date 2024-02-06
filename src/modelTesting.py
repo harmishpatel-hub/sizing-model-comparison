@@ -41,17 +41,19 @@ def modelTestingFilter():
             df_test = post_processing(df_test, data, "NN", nn_depth)
             within_spec = len(df_test[df_test['Depth Difference']<=10])
             tab4.dataframe(df_test)
-          
-            fig = unity_plot(df_test, data, "NN", "ILI Predicted Dimensions")
+            totalObservationsString = f"Total: {len(df_test)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%"
+            tab3.markdown(totalObservationsString)
+            # st.write()
+            nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], df_test['NN Depth'])
+            tab3.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
+
+            fig = unity_plot(df_test, data, "NN", "ILI Predicted Dimensions", totalObservationsString)
             # mlClassUnityFigList = mlClassUnity(data=df_test, colMLClass="ml_class", model_used="NN", title_string="ILI Predicted Dimensions")
             mlClassUnityFigList, mlClassStats = mlClassUnity(data=df_test, 
                                                colMLClass="ml_class", 
                                                model_used="NN", 
                                                title_string="ILI Predicted Dimensions")
-            tab3.markdown(f"Total: {len(df_test)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%")
-            # st.write()
-            nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], df_test['NN Depth'])
-            tab3.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
+            
             tab1.plotly_chart(fig)
             for i in mlClassUnityFigList:
                 tab2.plotly_chart(mlClassUnityFigList[i])
@@ -71,17 +73,18 @@ def modelTestingFilter():
             df_test = post_processing(df_test, data, "XGB", xgb_depth)
             within_spec = len(df_test[df_test['Depth Difference']<=10])
             tab4.dataframe(df_test)
-            
-            fig = unity_plot(df_test, data, "XGB", "ILI Predicted Dimensions")
+            totalObservationsString = f"Total: {len(df_test)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%"
+            tab3.markdown(totalObservationsString)
+            # st.write()
+            nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], df_test['XGB Depth'])
+            tab3.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
+            fig = unity_plot(df_test, data, "XGB", "ILI Predicted Dimensions", totalObservationsString=totalObservationsString)
             # mlClassUnityFigList = mlClassUnity(data=df_test, colMLClass="ml_class", model_used="XGB", title_string="ILI Predicted Dimensions")
             mlClassUnityFigList, mlClassStats = mlClassUnity(data=df_test, 
                                                colMLClass="ml_class", 
                                                model_used="XGB", 
                                                title_string="ILI Predicted Dimensions")
-            tab3.markdown(f"Total: {len(df_test)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%")
-            # st.write()
-            nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], df_test['XGB Depth'])
-            tab3.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
+            
             tab1.plotly_chart(fig)
             for i in mlClassUnityFigList:
                 tab2.plotly_chart(mlClassUnityFigList[i])
@@ -102,17 +105,18 @@ def modelTestingFilter():
             parsed_df = post_processing(parsed_df, data, "NN", nn_depth)
             within_spec = len(parsed_df[parsed_df['Depth Difference']<=10])
             tab4.dataframe(parsed_df)
-
-            fig = unity_plot(parsed_df, data, "NN", "Actual Dimensions")
+            totalObservationsString = f"Total: {len(parsed_df)} defects | Within 10% Tolerance:{within_spec} -- {round((within_spec/len(parsed_df))*100,2)}%"
+            tab3.markdown(totalObservationsString)
+            # st.write()
+            nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], parsed_df['NN Depth'])
+            tab3.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
+            
+            fig = unity_plot(parsed_df, data, "NN", "Actual Dimensions", totalObservationsString=totalObservationsString)
             mlClassUnityFigList, mlClassStats = mlClassUnity(data=parsed_df, 
                                                colMLClass="ml_class", 
                                                model_used="NN", 
                                                title_string="Actual Dimensions")
             
-            tab3.markdown(f"Total: {len(parsed_df)} defects \n\n Within 10% Tolerance:{within_spec} -- {round((within_spec/len(parsed_df))*100,2)}%")
-            # st.write()
-            nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], parsed_df['NN Depth'])
-            tab3.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
             
             tab1.plotly_chart(fig)
             for i in mlClassUnityFigList:
@@ -132,15 +136,18 @@ def modelTestingFilter():
             parsed_df = post_processing(parsed_df, data, "XGB", xgb_depth)
             within_spec = len(parsed_df[parsed_df['Depth Difference']<=10])
             tab4.dataframe(parsed_df)
-            fig = unity_plot(parsed_df, data, "XGB", "Actual Dimensions")
+            totalObservationsString = f"Total: {len(parsed_df)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(parsed_df)*100)}%"
+            tab3.markdown(totalObservationsString)
+            # st.write()
+            nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], parsed_df['XGB Depth'])
+            tab3.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
+
+            fig = unity_plot(parsed_df, data, "XGB", "Actual Dimensions", totalObservationsString=totalObservationsString)
             mlClassUnityFigList, mlClassStats = mlClassUnity(data=parsed_df, 
                                                colMLClass="ml_class", 
                                                model_used="XGB", 
                                                title_string="Actual Dimensions")
-            tab3.markdown(f"Total: {len(parsed_df)} defects \n\n Within 10% Tolerance:{within_spec} -- {round(within_spec/len(parsed_df)*100)}%")
-            # st.write()
-            nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], parsed_df['XGB Depth'])
-            tab3.markdown(f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}")
+            
             tab1.plotly_chart(fig)
             for i in mlClassUnityFigList:
                 tab2.plotly_chart(mlClassUnityFigList[i])
