@@ -1,5 +1,6 @@
 import streamlit as st
 import xgboost as xgb
+import matplotlib
 import os
 from src.component.downloadPDF import downloadPDF
 from src.charts.draw_mlClassUnity import mlClassUnity
@@ -44,6 +45,8 @@ def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MOD
             nn_depth = nn_model.predict(df_test)
             df_test = post_processing(df_test, data, "NN", nn_depth)
             within_spec = len(df_test[df_test['Depth Difference']<=10])
+            # showDf = df_test
+            # tab4.dataframe(df_test.style.background_gradient(subset=['Actual Depth']), height=100*len(df_test))
             tab4.dataframe(df_test)
             totalObservationsString = f"Total: {len(df_test)} defects \n\n Within ±10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%"
             tab3.markdown(totalObservationsString)
