@@ -1,3 +1,4 @@
+from src.backgroundComparisonFilter import backgroundComparison
 from src.modelTesting import modelTestingFilter
 from src.physicsFilter import physics
 
@@ -9,9 +10,12 @@ def main():
     PULLTEST_DATASET_OPTIONS = list(os.walk(f"./pulltest_dataset/"))[0][1]
     ONNX_MODEL_OPTIONS = list(os.walk(f"./onnx_models/"))[0][1]
     XGBOOST_MODEL_OPTIONS = list(os.walk(f"./onnx_models/xgboost_model"))[0][1]
-    mainFilter = st.sidebar.selectbox("Choose the Option:", options=["Physics Charts", "Model Testing"])
+    mainFilter = st.sidebar.selectbox("Choose the Option:", options=["Physics Charts", "Model Testing", "Background Comparisons"])
     if mainFilter == "Model Testing":
         modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MODEL_OPTIONS)
     if mainFilter == "Physics Charts":
         physics(ONNX_MODEL_OPTIONS)
+    if mainFilter == "Background Comparisons":
+        backgroundComparison(PULLTEST_DATASET_OPTIONS)
+
 
