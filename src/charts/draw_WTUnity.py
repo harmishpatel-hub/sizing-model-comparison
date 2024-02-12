@@ -5,38 +5,38 @@ from src.charts.draw_tolerance_lines import draw_tolerance_lines
 from src.charts.draw_unity import draw_unity
 from src.charts.update_traces import update_traces 
 
-mlClassEncoded={
-    0: 'Axial Grooving',
-    1: 'Axial Slotting',
-    2: 'Circ Grooving',
-    3: 'Circ Slotting',
-    4: 'General',
-    5: 'Pinhole',
-    6: 'Pitting'
-}
+# mlClassEncoded={
+#     0: 'Axial Grooving',
+#     1: 'Axial Slotting',
+#     2: 'Circ Grooving',
+#     3: 'Circ Slotting',
+#     4: 'General',
+#     5: 'Pinhole',
+#     6: 'Pitting'
+# }
 
-def mlClassUnity(data,  colMLClass, model_used, title_string, actual_depth="Actual Depth"):
+def wtUnity(data,  colWT, model_used, title_string, actual_depth="Actual Depth"):
     listOfCharts = {}
     listOfStats = {}
     start, end = 0, 90
     tolerance = 10
-    for mlCLass in data[colMLClass].unique():
+    for wt in data[colWT].unique():
         fig = go.Figure()
-        dataMLClass = data[data[colMLClass]==mlCLass]
+        dataWTClass = data[data[colWT]==wt]
         fig.add_trace(
             go.Scatter(
-                x = dataMLClass[actual_depth],
-                y = dataMLClass[f"{model_used} Depth"],
+                x = dataWTClass[actual_depth],
+                y = dataWTClass[f"{model_used} Depth"],
                 mode = "markers",
                 showlegend=False
-                # name = f"{mlClassEncoded[mlCLass]}",
+                # name = f"{wt}",
                 # hovertext = data['Item #'],
                 # hoverlabel=dict(namelength=0),
                 # hovertemplate='Item # %{hovertext}'
             )
         )
-        withinSpec = dataMLClass[dataMLClass['Depth Difference']<=10]
-        totalObservationsString = f"Total: {len(dataMLClass)} defects | Within ±10% Tolerance: {len(withinSpec)} -- {round((len(withinSpec)/len(dataMLClass))*100,2)}%"
+        withinSpec = dataWTClass[dataWTClass['Depth Difference']<=10]
+        totalObservationsString = f"Total: {len(dataWTClass)} defects | Within ±10% Tolerance: {len(withinSpec)} -- {round((len(withinSpec)/len(dataWTClass))*100,2)}%"
 
         fig.add_annotation(
             x = 35,
@@ -57,7 +57,7 @@ def mlClassUnity(data,  colMLClass, model_used, title_string, actual_depth="Actu
         fig = draw_unity(fig, start, end)
         fig = draw_tolerance_lines(fig, start, end, tolerance, unit="%")
         fig = update_traces(fig, start, end, 
-                            string=f"{title_string} - {mlClassEncoded[mlCLass]}", 
+                            string=f"{title_string} - {wt}", 
                             col1=f"{actual_depth} (%)", 
                             col2=f"{model_used} Depth (%)", 
                             tick=10, 
@@ -65,12 +65,12 @@ def mlClassUnity(data,  colMLClass, model_used, title_string, actual_depth="Actu
                             plotHeight=600)
         
         
-        nn_mae, nn_mse, nn_rmse = model_score(dataMLClass[f"{actual_depth}"], dataMLClass[f"{model_used} Depth"])
+        nn_mae, nn_mse, nn_rmse = model_score(dataWTClass[f"{actual_depth}"], dataWTClass[f"{model_used} Depth"])
         
-        listOfStats[f"{mlClassEncoded[mlCLass]}"] = f"Total: {len(dataMLClass)} defects \n\n Within 10% Tolerance: {len(withinSpec)} -- {round((len(withinSpec)/len(dataMLClass))*100,2)}% \n\n Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}"
+        listOfStats[f"{wt}"] = f"Total: {len(dataWTClass)} defects \n\n Within 10% Tolerance: {len(withinSpec)} -- {round((len(withinSpec)/len(dataWTClass))*100,2)}% \n\n Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}"
 
         # listOfStats[f"{mlClassEncoded[mlCLass]} Error"] = f"Mean Absolute Error: {nn_mae}\n\n Mean Squared Error: {nn_mse}\n\n Root Mean Squared Error: {nn_rmse}"
-        listOfCharts[f"{mlClassEncoded[mlCLass]}"] = fig
+        listOfCharts[f"{wt}"] = fig
         listOfCharts = dict(sorted(listOfCharts.items()))
         listOfStats = dict(sorted(listOfStats.items()))
 
