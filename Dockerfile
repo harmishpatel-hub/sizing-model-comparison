@@ -7,12 +7,12 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
-WORKDIR /sizing-model-comparison
+WORKDIR /app
 
-RUN git clone https://github.com/harmishpatel21/sizing-model-comparison.git
-
+RUN git clone https://github.com/harmishpatel21/sizing-model-comparison.git . 
+COPY . /app/
 # Install pip requirements
-# COPY requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 RUN python -m pip install -r requirements.txt
 
 EXPOSE 8501

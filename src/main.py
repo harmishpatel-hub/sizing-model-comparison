@@ -16,7 +16,7 @@ def main():
                                       options=[
                                           "Physics Charts", 
                                           "Model Testing", 
-                                          "Background Comparisons",
+                                        #   "Background Comparisons",
                                           "Background vs WT [in]"])
     if mainFilter == "Model Testing":
         modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MODEL_OPTIONS)
@@ -24,7 +24,7 @@ def main():
         physics(ONNX_MODEL_OPTIONS)
     if mainFilter == "Background vs WT [in]":
         backgroundVsWT(JOINTBKGLEVEL_OPTIONS)
-    if mainFilter == "Background Comparisons":
-        backgroundComparison(PULLTEST_DATASET_OPTIONS)
+    # if mainFilter == "Background Comparisons":
+    #     backgroundComparison(PULLTEST_DATASET_OPTIONS)
 
 
