@@ -10,7 +10,14 @@ from src.read_model import read_model, read_xgboost_model
 from src.score.model_score import model_score 
 
 def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MODEL_OPTIONS):
-    
+    """_summary_
+
+    Args:
+        PULLTEST_DATASET_OPTIONS (_type_): _description_
+        ONNX_MODEL_OPTIONS (_type_): _description_
+        XGBOOST_MODEL_OPTIONS (_type_): _description_
+    """
+
     # st.write(XGBOOST_MODEL_OPTIONS)
     pipe_size = st.sidebar.selectbox("Select Pipe Size[in]:", options=PULLTEST_DATASET_OPTIONS)
 
@@ -32,7 +39,7 @@ def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MOD
         READ_XGBOOST_MODEL_FILE = f"./onnx_models/xgboost_model/{select_xgboost_model}/"
         xgboost_model = read_xgboost_model(READ_XGBOOST_MODEL_FILE)
 
-    col1, col2 = st.columns(2)
+    col2, col1 = st.columns(2)
     ### ILI PREDICTED DIMENSION
     with col1:
         st.subheader("Predicted Depth - (ILI Dimensions)")
@@ -110,7 +117,7 @@ def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MOD
             nn_depth = nn_model.predict(parsed_df)
             parsed_df = post_processing(parsed_df, data, "NN", nn_depth)
             within_spec = len(parsed_df[parsed_df['Depth Difference']<=10])
-            tab4.dataframe(parsed_df)
+            tab4.dataframe(parsed_df.sort_values(by=['wt', 'Shape', 'Actual Depth']))
             totalObservationsString = f"Total: {len(parsed_df)} defects | Within ±10% Tolerance:{within_spec} -- {round((within_spec/len(parsed_df))*100,2)}%"
             tab3.markdown(totalObservationsString)
             # st.write()
@@ -158,7 +165,7 @@ def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MOD
             xgb_depth = xgboost_model.predict(df_p)
             parsed_df = post_processing(parsed_df, data, "XGB", xgb_depth)
             within_spec = len(parsed_df[parsed_df['Depth Difference']<=10])
-            tab4.dataframe(parsed_df)
+            tab4.dataframe(parsed_df.sort_values(by=['wt', 'Shape', 'Actual Depth']))
             totalObservationsString = f"Total: {len(parsed_df)} defects \n\n Within ±10% Tolerance:{within_spec} -- {round(within_spec/len(parsed_df)*100)}%"
             tab3.markdown(totalObservationsString)
             # st.write()

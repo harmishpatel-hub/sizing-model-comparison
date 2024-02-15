@@ -25,15 +25,17 @@ def backgroundVsWT(JOINTBKGLEVEL_OPTIONS):
         le = LabelEncoder()
         df['Tool Used COLOR'] = le.fit_transform(df['Tool Used'])
         df['Year'] = df['Info'].apply(lambda x: extractYear(x))
-        tab2.dataframe(df[[
-                         'Tool Used', 
-                         'FeatureID', 
-                         'WT[in]', 
-                         'Speed[ft/s]', 
-                         'BkgLevel[counts]',
-                         'Year',
-                         'Tool Used COLOR']])
+        # tab2.dataframe(df[[
+        #                  'Tool Used', 
+        #                  'FeatureID', 
+        #                  'WT[in]', 
+        #                  'Speed[ft/s]', 
+        #                  'BkgLevel[counts]',
+        #                  'Year',
+        #                  'Tool Used COLOR']])
         
+        dataframeMedian = df.groupby(by=['Tool Used', 'WT[in]'], as_index=False)['BkgLevel[counts]'].apply(lambda x: sorted(x))
+        tab2.dataframe(dataframeMedian)
         dataframeMedianBkgLevel = df.groupby(by=['Tool Used', 'WT[in]'], as_index=False)['BkgLevel[counts]'].median()
         # dataframeMeanBkgLevel = df.groupby(['Tool Used', 'WT[in]'])['BkgLevel[counts]'].mean()
         fig = px.scatter(dataframeMedianBkgLevel,
