@@ -1,3 +1,4 @@
+from src.referencePeakValueRangeFilter import referencePeakValueRange
 from src.backgroundVsWTFilter import backgroundVsWT
 from src.backgroundComparisonFilter import backgroundComparison
 from src.modelTesting import modelTestingFilter
@@ -39,6 +40,7 @@ def main():
                                       options=[
                                           "Physics Charts", 
                                           "Model Testing", 
+                                          "Reference Peak Value Range (Pulltests)",
                                         #   "Background Comparisons",
                                           "Background vs WT [in]"])
     
@@ -46,6 +48,8 @@ def main():
         modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MODEL_OPTIONS)
     if mainFilter == "Physics Charts":
         physics(ONNX_MODEL_OPTIONS, XGBOOST_MODEL_OPTIONS)
+    if mainFilter == "Reference Peak Value Range (Pulltests)":
+        referencePeakValueRange(PULLTEST_DATASET_OPTIONS)
     if mainFilter == "Background vs WT [in]":
         backgroundVsWT(JOINTBKGLEVEL_OPTIONS)
     # if mainFilter == "Background Comparisons":
