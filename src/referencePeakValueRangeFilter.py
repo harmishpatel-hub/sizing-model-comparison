@@ -36,52 +36,53 @@ def referencePeakValueRange(PULLTEST_DATASET_OPTIONS):
         extIntFilteredData = wtFilteredData[wtFilteredData['Ext/Int']==extIntSelection]
 
         shapeSelection = st.multiselect('Select Shape', options=np.sort(extIntFilteredData['Shape'].unique()))
-        tempDF = pd.DataFrame()
-        for shape in shapeSelection:
-            shapeFilteredData = extIntFilteredData[extIntFilteredData['Shape']==shape]
-            shapeFilteredData = shapeFilteredData.sort_values(by=['Actual Depth'])
-            shapeFilteredData = shapeFilteredData[[ 'Item #',
-                                                'ML Class', 
-                                                'Ext/Int', 
-                                                'Peak Value', 
-                                                'Actual Depth',
-                                                'Shape', 
-                                                'Length [in]',
-                                                'Width [in]']]
-            tempDF = pd.concat([tempDF, shapeFilteredData])
-            tempDF.reset_index(inplace=True)
-            tempDF = tempDF[['Item #', 'ML Class', 'Ext/Int', 'Peak Value', 
-                            'Actual Depth', 'Shape', 'Length [in]', 'Width [in]']]
+        if shapeSelection:
+            tempDF = pd.DataFrame()
+            for shape in shapeSelection:
+                shapeFilteredData = extIntFilteredData[extIntFilteredData['Shape']==shape]
+                shapeFilteredData = shapeFilteredData.sort_values(by=['Actual Depth'])
+                shapeFilteredData = shapeFilteredData[[ 'Item #',
+                                                    'ML Class', 
+                                                    'Ext/Int', 
+                                                    'Peak Value', 
+                                                    'Actual Depth',
+                                                    'Shape', 
+                                                    'Length [in]',
+                                                    'Width [in]']]
+                tempDF = pd.concat([tempDF, shapeFilteredData])
+                tempDF.reset_index(inplace=True)
+                tempDF = tempDF[['Item #', 'ML Class', 'Ext/Int', 'Peak Value', 
+                                'Actual Depth', 'Shape', 'Length [in]', 'Width [in]']]
 
-    with col2:
-        chart, data = st.tabs(["📈 Chart", "💾 Data"])
-        with chart:
-            fig = go.Figure()
-            for shape in tempDF['Shape'].unique():
-                templFilteredDF = tempDF[tempDF['Shape']==shape]
-                fig.add_trace(
-                    go.Scatter(
-                        x=templFilteredDF['Peak Value'],
-                        y=templFilteredDF['Actual Depth'],
-                        mode='markers',
-                        name=f"{templFilteredDF['Shape'].unique()}",
-                        showlegend=True
+            with col2:
+                chart, data = st.tabs(["📈 Chart", "💾 Data"])
+                with chart:
+                    fig = go.Figure()
+                    for shape in tempDF['Shape'].unique():
+                        templFilteredDF = tempDF[tempDF['Shape']==shape]
+                        fig.add_trace(
+                            go.Scatter(
+                                x=templFilteredDF['Peak Value'],
+                                y=templFilteredDF['Actual Depth'],
+                                mode='markers',
+                                name=f"{templFilteredDF['Shape'].unique()}",
+                                showlegend=True
+                            )
+                        )
+                    fig.update_layout(
+                        title=f'{pipe_size} | WT: {wtSelection} [in] | {extIntSelection} | Shape# {shapeSelection}',
+                        width=800,
+                        height=600,
+                        xaxis=dict(
+                            dtick=50
+                        ),
+                        yaxis=dict(
+                            side='right'
+                        )
                     )
-                )
-            fig.update_layout(
-                title=f'{pipe_size} | WT: {wtSelection} [in] | {extIntSelection} | Shape# {shapeSelection}',
-                width=800,
-                height=600,
-                xaxis=dict(
-                    dtick=50
-                ),
-                yaxis=dict(
-                    side='right'
-                )
-            )
-            st.plotly_chart(fig)
+                    st.plotly_chart(fig)
 
-        with data:
-           
-            st.dataframe(tempDF.style.background_gradient(subset=['Actual Depth']), height = 25*len(shapeFilteredData), hide_index=True)
-    
+                with data:
+                
+                    st.dataframe(tempDF.style.background_gradient(subset=['Actual Depth']), height = 25*len(shapeFilteredData), hide_index=True)
+            
