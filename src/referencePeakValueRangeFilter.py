@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from plotly import graph_objects as go
 
-from src.dataset_preprocessing import preprocess_shape_depth, read_excel, preprocess_length_width
+from src.dataset_preprocessing import preprocess_shape_depth, read_excel, preprocess_length_width, read_excel_with_filename
 
 
 def referencePeakValueRange(PULLTEST_DATASET_OPTIONS):
@@ -21,7 +21,7 @@ def referencePeakValueRange(PULLTEST_DATASET_OPTIONS):
 
     if pipe_size:
         READ_EXCEL_FILES = f"./pulltest_dataset/{pipe_size}/"
-        df = read_excel(READ_EXCEL_FILES)
+        df = read_excel_with_filename(READ_EXCEL_FILES)
         
         data = preprocess_shape_depth(df)
         data = preprocess_length_width(data)
@@ -41,18 +41,16 @@ def referencePeakValueRange(PULLTEST_DATASET_OPTIONS):
             for shape in shapeSelection:
                 shapeFilteredData = extIntFilteredData[extIntFilteredData['Shape']==shape]
                 shapeFilteredData = shapeFilteredData.sort_values(by=['Actual Depth'])
-                shapeFilteredData = shapeFilteredData[[ 'Item #',
-                                                    'ML Class', 
-                                                    'Ext/Int', 
-                                                    'Peak Value', 
-                                                    'Actual Depth',
-                                                    'Shape', 
-                                                    'Length [in]',
-                                                    'Width [in]']]
+                shapeFilteredData = shapeFilteredData[[ 'Item #', 'ML Class', 'Ext/Int', 
+                                                    'Peak Value', 'Actual Depth', 'Shape', 
+                                                    'Length [in]', 'Width [in]',
+                                                    'Pulltest Date', 'Pulltest #']]
                 tempDF = pd.concat([tempDF, shapeFilteredData])
                 tempDF.reset_index(inplace=True)
                 tempDF = tempDF[['Item #', 'ML Class', 'Ext/Int', 'Peak Value', 
-                                'Actual Depth', 'Shape', 'Length [in]', 'Width [in]']]
+                                'Actual Depth', 'Shape', 'Length [in]', 'Width [in]',
+                                'Pulltest Date', 'Pulltest #']]
+                tempDF = tempDF.sort_values(by='Actual Depth')
 
             with col2:
                 chart, data = st.tabs(["📈 Chart", "💾 Data"])
