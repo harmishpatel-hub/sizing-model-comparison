@@ -72,15 +72,12 @@ def referencePeakValueRange(PULLTEST_DATASET_OPTIONS):
                         width=800,
                         height=600,
                         xaxis=dict(
-                            dtick=50
-                        ),
+                            dtick=50),
                         yaxis=dict(
-                            side='right'
-                        )
+                            side='right')
                     )
                     st.plotly_chart(fig)
 
                 with data:
-                
                     st.dataframe(tempDF.style.background_gradient(subset=['Actual Depth']), height = 25*len(shapeFilteredData), hide_index=True)
             
