@@ -4,7 +4,7 @@ from src.charts.draw_tolerance_lines import draw_tolerance_lines
 from src.charts.draw_unity import draw_unity
 from src.charts.update_traces import update_traces 
 
-def unity_plot(df, data, model_used, title_string, actual_depth="Actual Depth"):
+def unity_plot(df, data, model_used, title_string, totalObservationsString, actual_depth="Actual Depth"):
     start = 0
     end = 90
     tolerance = 10
@@ -21,7 +21,26 @@ def unity_plot(df, data, model_used, title_string, actual_depth="Actual Depth"):
             hovertemplate='Item # %{hovertext}'
         )
     )
+    fig.add_annotation(
+        x = 35,
+        y = 85,
+        text=f"<b>{totalObservationsString}<b>",
+        showarrow=False,
+        font=dict(
+            family="Courier New, monospace",
+            size=18,
+            color="#000000"
+            ),
+        bordercolor="#675c58",
+        borderwidth=1,
+        bgcolor="#eeeee4",
+        opacity=0.8
+        )
     fig = draw_unity(fig, start, end)
     fig = draw_tolerance_lines(fig, start, end, tolerance, unit="%")
-    fig = update_traces(fig, start, end, title_string, f"{actual_depth} (%)", f"{model_used} Depth (%)", 10)
+    fig = update_traces(fig, start, end, 
+                        string=f"{title_string} with {model_used}", 
+                        col1=f"{actual_depth} (%)", 
+                        col2=f"{model_used} Depth (%)", 
+                        tick=10, plotWidth=1000, plotHeight=800)
     return fig

@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  sizingmodelcomparison:
+    image: sizingmodelcomparison
+    build:
+      context: .
+      dockerfile: ./Dockerfile
