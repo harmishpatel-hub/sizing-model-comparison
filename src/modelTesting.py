@@ -1,8 +1,6 @@
 import streamlit as st
 import xgboost as xgb
-import matplotlib
-import os
-from src.component.downloadPDF import downloadPDF
+from src.charts.draw_WTUnity import wtUnity
 from src.charts.draw_mlClassUnity import mlClassUnity
 from src.charts.unity_figure import unity_plot
 from src.dataset_postprocessing import post_processing
@@ -12,7 +10,14 @@ from src.read_model import read_model, read_xgboost_model
 from src.score.model_score import model_score 
 
 def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MODEL_OPTIONS):
-    
+    """_summary_
+
+    Args:
+        PULLTEST_DATASET_OPTIONS (_type_): _description_
+        ONNX_MODEL_OPTIONS (_type_): _description_
+        XGBOOST_MODEL_OPTIONS (_type_): _description_
+    """
+
     # st.write(XGBOOST_MODEL_OPTIONS)
     pipe_size = st.sidebar.selectbox("Select Pipe Size[in]:", options=PULLTEST_DATASET_OPTIONS)
 
@@ -34,7 +39,7 @@ def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MOD
         READ_XGBOOST_MODEL_FILE = f"./onnx_models/xgboost_model/{select_xgboost_model}/"
         xgboost_model = read_xgboost_model(READ_XGBOOST_MODEL_FILE)
 
-    col1, col2 = st.columns(2)
+    col2, col1 = st.columns(2)
     ### ILI PREDICTED DIMENSION
     with col1:
         st.subheader("Predicted Depth - (ILI Dimensions)")
@@ -64,6 +69,7 @@ def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MOD
             tab1.plotly_chart(fig)
             for i in mlClassUnityFigList:
                 tab2.plotly_chart(mlClassUnityFigList[i])
+                
             for i in mlClassStats:
                 tab3.divider()
                 tab3.subheader(i)
@@ -105,13 +111,13 @@ def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MOD
         st.subheader("Predicted Depth - (Actual Dimensions)")
         retrieve_actual_dimensions = st.checkbox("Predict the Depths with NN (Actual Dimensions):")
         if retrieve_actual_dimensions:
-            tab1, tab2, tab3, tab4 = st.tabs(["📈 Unity Plot", "💹 ML Class Unity Plot", "📊 Statistics", "💾 Data"])
+            tab1, tab5, tab2, tab3, tab4 = st.tabs(["📈 Unity Plot", "🏢 WT", "💹 ML Class Unity Plot", "📊 Statistics", "💾 Data", ])
             replaced_length_width_data = preprocess_length_width(data)
             parsed_df = parsed_data(replaced_length_width_data)
             nn_depth = nn_model.predict(parsed_df)
             parsed_df = post_processing(parsed_df, data, "NN", nn_depth)
             within_spec = len(parsed_df[parsed_df['Depth Difference']<=10])
-            tab4.dataframe(parsed_df)
+            tab4.dataframe(parsed_df.sort_values(by=['wt', 'Shape', 'Actual Depth']))
             totalObservationsString = f"Total: {len(parsed_df)} defects | Within ±10% Tolerance:{within_spec} -- {round((within_spec/len(parsed_df))*100,2)}%"
             tab3.markdown(totalObservationsString)
             # st.write()
@@ -127,7 +133,9 @@ def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MOD
             
             tab1.plotly_chart(fig)
             for i in mlClassUnityFigList:
+                tab2.subheader(i)
                 tab2.plotly_chart(mlClassUnityFigList[i])
+                tab2.divider()
             for i in mlClassStats:
                 tab3.divider()
                 tab3.subheader(i)
@@ -139,17 +147,25 @@ def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MOD
             #                      mime = 'application/octate_stream',
             #                      key = 'pdf download'
             #                     )
-
+            wtUnityFigList, wtStats = wtUnity(data = parsed_df,
+                                              colWT="wt",
+                                              model_used="NN",
+                                              title_string='Actual Dimensions')
+            for i in wtUnityFigList:
+                tab5.subheader(i)
+                tab5.plotly_chart(wtUnityFigList[i])
+                tab5.divider()
+                
         xgboost_depths = st.checkbox("Predict the Depths with XGBoost (Actual Dimensions):")
         if xgboost_depths:
-            tab1, tab2, tab3, tab4 = st.tabs(["📈 Unity Plot", "💹 ML Class Unity Plot", "📊 Statistics", "💾 Data"])
+            tab1, tab5, tab2, tab3, tab4 = st.tabs(["📈 Unity Plot", "🏢 WT", "💹 ML Class Unity Plot", "📊 Statistics", "💾 Data", ])
             replaced_length_width_data = preprocess_length_width(data)
             parsed_df = parsed_data(replaced_length_width_data)
             df_p = xgb.DMatrix(parsed_df)
             xgb_depth = xgboost_model.predict(df_p)
             parsed_df = post_processing(parsed_df, data, "XGB", xgb_depth)
             within_spec = len(parsed_df[parsed_df['Depth Difference']<=10])
-            tab4.dataframe(parsed_df)
+            tab4.dataframe(parsed_df.sort_values(by=['wt', 'Shape', 'Actual Depth']))
             totalObservationsString = f"Total: {len(parsed_df)} defects \n\n Within ±10% Tolerance:{within_spec} -- {round(within_spec/len(parsed_df)*100)}%"
             tab3.markdown(totalObservationsString)
             # st.write()
@@ -170,3 +186,12 @@ def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MOD
                 tab3.divider()
                 tab3.subheader(i)
                 tab3.write(f"\n\n {mlClassStats[i]}")
+
+            wtUnityFigList, wtStats = wtUnity(data = parsed_df,
+                                              colWT="wt",
+                                              model_used="XGB",
+                                              title_string='Actual Dimensions')
+            for i in wtUnityFigList:
+                tab5.subheader(i)
+                tab5.plotly_chart(wtUnityFigList[i])
+                tab5.divider()

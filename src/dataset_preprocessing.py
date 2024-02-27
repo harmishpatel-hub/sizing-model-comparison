@@ -17,6 +17,17 @@ def read_csvs(PATH):
     # df = pd.concat(pd.read_csv(f'{PATH}{f}') for f in files)
     return combinedDF
 
+def read_excel_with_filename(PATH):
+    files = [f for f in listdir(PATH) if f.endswith('.xlsx')]
+    combinedDF = pd.DataFrame()
+    for file in files:
+        df_excel = pd.read_excel(f'{PATH}{file}')
+        df_excel['File Name'] = file.split('.xlsx')[0]
+        df_excel['Pulltest Date'] = df_excel['File Name'].apply(lambda x: x.split(' ')[1])
+        df_excel['Pulltest #'] = df_excel['File Name'].apply(lambda x: x.split(' ')[2])
+        combinedDF = pd.concat([combinedDF, df_excel])
+    return combinedDF
+
 def read_excel(PATH):
     files = [f for f in listdir(PATH) if f.endswith('.xlsx')]
     df = pd.concat(pd.read_excel(f'{PATH}{f}') for f in files)
