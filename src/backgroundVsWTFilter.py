@@ -26,8 +26,8 @@ def backgroundVsWT(JOINTBKGLEVEL_OPTIONS):
         df['Tool Used COLOR'] = le.fit_transform(df['Tool Used'])
         df['Year'] = df['Info'].apply(lambda x: extractYear(x))
         
-        dataframeMedian = df.groupby(by=['Tool Used', 'WT[in]'], as_index=False)['BkgLevel[counts]'].apply(lambda x: sorted(x))
-        tab3.dataframe(dataframeMedian)
+        dataframeGroupedbyToolUsedandWT = df.groupby(by=['Tool Used', 'WT[in]'], as_index=False)['BkgLevel[counts]'].apply(lambda x: ', '.join(str(i) for i in sorted(x)))
+        tab3.dataframe(dataframeGroupedbyToolUsedandWT)
         dataframeMedianBkgLevel = df.groupby(by=['Tool Used', 'WT[in]'], as_index=False)['BkgLevel[counts]'].median()
 
         fig = px.scatter(dataframeMedianBkgLevel,
@@ -68,7 +68,7 @@ def backgroundVsWT(JOINTBKGLEVEL_OPTIONS):
         )
         fig.update_xaxes(type='category')
         fig.update_layout(
-            title = f'{pipe_size} WT[in] vs BkgLevel[counts] (Median Values) per Tool',
+            title = f'{pipe_size} WT[in] vs BkgLevel[counts] per Tool',
             width = 1000,
             height = 800,
             xaxis = dict(
