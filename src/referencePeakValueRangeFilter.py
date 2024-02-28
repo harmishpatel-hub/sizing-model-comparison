@@ -2,9 +2,12 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from plotly import graph_objects as go
+import plotly.io as pio
+from src.component.downloadPDF import downloadPDF
 
 from src.dataset_preprocessing import preprocess_shape_depth, read_excel, preprocess_length_width, read_excel_with_filename
 
+pio.templates.default = 'plotly'
 
 def referencePeakValueRange(PULLTEST_DATASET_OPTIONS):
     """
@@ -28,7 +31,7 @@ def referencePeakValueRange(PULLTEST_DATASET_OPTIONS):
         st.subheader(f'{pipe_size} Pulltest Data')
         # st.dataframe(data)
     col1, col2 = st.columns([1,3])
-   
+    tempFigures = {}
     with col1:
         wtSelection = st.selectbox('Select WT [in]', options=data['WT [in]'].unique())
         wtFilteredData = data[data['WT [in]']==wtSelection]
@@ -55,6 +58,7 @@ def referencePeakValueRange(PULLTEST_DATASET_OPTIONS):
             with col2:
                 chart, data = st.tabs(["📈 Chart", "💾 Data"])
                 with chart:
+                    
                     fig = go.Figure()
                     for shape in tempDF['Shape'].unique():
                         templFilteredDF = tempDF[tempDF['Shape']==shape]
@@ -63,21 +67,31 @@ def referencePeakValueRange(PULLTEST_DATASET_OPTIONS):
                                 x=templFilteredDF['Peak Value'],
                                 y=templFilteredDF['Actual Depth'],
                                 mode='markers',
-                                name=f"{templFilteredDF['Shape'].unique()}",
+                                name=f"Shape# {templFilteredDF['Shape'].unique()}",
                                 showlegend=True
                             )
                         )
                     fig.update_layout(
                         title=f'{pipe_size} | WT: {wtSelection} [in] | {extIntSelection} | Shape# {shapeSelection}',
-                        width=800,
+                        width=750,
                         height=600,
-                        xaxis=dict(
-                            dtick=50),
+                        # xaxis=dict(
+                        #     dtick=25),
                         yaxis=dict(
-                            side='right')
+                            side='right'),
+                        legend_orientation='h',
+                        
                     )
+                    tempFigures[shape] = fig
                     st.plotly_chart(fig)
-
+                
                 with data:
                     st.dataframe(tempDF.style.background_gradient(subset=['Actual Depth']), height = 25*len(shapeFilteredData), hide_index=True)
+
+            pdfOutput = downloadPDF(report=tempFigures, subheader=f'{pipe_size} | {wtSelection} | {extIntSelection}')
+            st.download_button(label='EXPORT PDF',
+                                data = pdfOutput.output('', dest='S').encode('latin-1'),
+                                file_name = f'{pipe_size}_{wtSelection}_{extIntSelection}.pdf',
+                                mime = 'application/octate_stream',
+                                key = 'pdf download')
             

@@ -1,11 +1,16 @@
+import shutil
+from turtle import width
 from fpdf import FPDF
+from matplotlib import scale
+import streamlit as st 
+
 import os
 
 class PDF(FPDF):
     def header(self) -> None:
         # logo = f'./Logo/En'
         logo = f"src/component/Logo/Entegra-Logo.png"
-        self.image(logo, x=10, y=5, w=45, h=21)
+        self.image(logo, x=10, y=5, w=55, h=18)
         self.ln(15)
         return super().header()
     
@@ -46,17 +51,19 @@ class PDF(FPDF):
         self.write_content(stat_string, key_string)
 
 
-def downloadPDF(report, subheader, string):
+def downloadPDF(report, subheader):
     pdfOutput = PDF('P', 'mm', 'A4')
     pdfOutput.alias_nb_pages()
     temp_path = 'plots/'
-    if not os.path.exists(temp_path):
+    if not os.path.exists(temp_path): ## temp directory to store the figs.
         os.makedirs(temp_path)
     pdfOutput.add_page()
     pdfOutput.set_title(subheader)
 
-    # for chart in report:
-    #     report[chart].write_image(f'{temp_path}{chart}.png')
-    #     pdfOutput.image_content(f'{temp_path}{chart}.png', chart)
+    for chart in report:
+        report[chart].write_image(f'{temp_path}{chart}.png', scale=2, width=800, height=600)
+        pdfOutput.image_content(f'{temp_path}{chart}.png', f'{chart}')
 
+    shutil.rmtree(temp_path) ## delete the dir
+    
     return pdfOutput
