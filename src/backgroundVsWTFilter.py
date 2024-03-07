@@ -7,14 +7,40 @@ from plotly import graph_objects as go
 import plotly.express as px
 
 def extractToolUsed(string):
+    """To extract the tool used from dataframe
+
+    Args:
+        string: filename stored in dataframe column
+
+    Returns:
+        string: tool used in a pulltest
+    """
     return string.split(' ')[0]
 
 def extractYear(string):
+    """to extract a year from dataframe
+
+    Args:
+        string: filename
+
+    Returns:
+        string: year
+    """
     string = string.split(" ")[1]
     string = string.split("-")[0]
     return string
 
 def backgroundVsWT(JOINTBKGLEVEL_OPTIONS):
+    """Initially filters will be provided to choose the pipe size and based on
+    selection it will provide a chart and dataframe indicating the different 
+    background level for each wall thickness in each tool used.
+
+    Args:
+        JOINTBKGLEVEL_OPTIONS (list): the file list from JointBkgLevel_dataset path
+
+    Returns:
+        None:
+    """
     pipe_size = st.sidebar.selectbox('Select Pipe Size[in]:',
                                      options=JOINTBKGLEVEL_OPTIONS)
     if pipe_size:
@@ -25,6 +51,7 @@ def backgroundVsWT(JOINTBKGLEVEL_OPTIONS):
         le = LabelEncoder()
         df['Tool Used COLOR'] = le.fit_transform(df['Tool Used'])
         df['Year'] = df['Info'].apply(lambda x: extractYear(x))
+        df = df.sort_values(by='WT[in]') # sort by wall thcikness
         
         dataframeGroupedbyToolUsedandWT = df.groupby(by=['Tool Used', 'WT[in]'], as_index=False)['BkgLevel[counts]'].apply(lambda x: ', '.join(str(i) for i in sorted(x)))
         tab3.dataframe(dataframeGroupedbyToolUsedandWT)

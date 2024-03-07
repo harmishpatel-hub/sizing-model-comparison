@@ -1,3 +1,4 @@
+
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -32,11 +33,43 @@ def referencePeakValueRange(PULLTEST_DATASET_OPTIONS):
         # st.dataframe(data)
     col1, col2 = st.columns([1,3])
     tempFigures = {}
+    exportPDFforAllShape = {}
     with col1:
         wtSelection = st.selectbox('Select WT [in]', options=data['WT [in]'].unique())
         wtFilteredData = data[data['WT [in]']==wtSelection]
         extIntSelection = st.selectbox('Select External/Internal', options=wtFilteredData['Ext/Int'].unique())
         extIntFilteredData = wtFilteredData[wtFilteredData['Ext/Int']==extIntSelection]
+        extIntFilteredData = extIntFilteredData.sort_values(by=['WT [in]', 'Shape'])
+        for shape in extIntFilteredData['Shape'].unique():
+            shapeFilteredData = extIntFilteredData[extIntFilteredData['Shape']==shape]
+            fig = go.Figure()
+            fig.add_trace(
+                go.Scatter(
+                    x=shapeFilteredData['Peak Value'],
+                    y=shapeFilteredData['Actual Depth'],
+                    mode='markers',
+                    name=f'Shape# {shape}',
+                    showlegend=True
+                )
+            )
+            fig.update_layout(
+                title=f'{pipe_size} | WT: {wtSelection} [in] | {extIntSelection} | Shape# {shape}',
+                width=750,
+                height=600,
+                # xaxis=dict(
+                #     dtick=25),
+                yaxis=dict(
+                    side='right'),
+                legend_orientation='h'
+            )
+            exportPDFforAllShape[shape]=fig
+        
+        # pdfOutput = downloadPDF(exportPDFforAllShape, subheader=f'{pipe_size} | {wtSelection} | {extIntSelection}')
+        # st.download_button(label='EXPORT ALL SHAPE PDF',
+        #                     data = pdfOutput.output('', dest='S').encode('latin-1'),
+        #                     file_name = f'{pipe_size}_{wtSelection}_{extIntSelection}.pdf',
+        #                     mime = 'application/octate_stream',
+        #                     key = 'export all shape pdf')
 
         shapeSelection = st.multiselect('Select Shape', options=np.sort(extIntFilteredData['Shape'].unique()))
         if shapeSelection:
