@@ -19,7 +19,7 @@ def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MOD
     """
 
     # st.write(XGBOOST_MODEL_OPTIONS)
-    pipe_size = st.sidebar.selectbox("Select Pipe Size[in]:", options=PULLTEST_DATASET_OPTIONS)
+    pipe_size = st.sidebar.selectbox("Select Pipe Size[in] Dataset:", options=PULLTEST_DATASET_OPTIONS)
 
     if pipe_size:
         READ_EXCEL_FILES = f"./pulltest_dataset/{pipe_size}/"
@@ -53,7 +53,7 @@ def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MOD
             # showDf = df_test
             # tab4.dataframe(df_test.style.background_gradient(subset=['Actual Depth']), height=100*len(df_test))
             tab4.dataframe(df_test)
-            totalObservationsString = f"Total: {len(df_test)} defects \n\n Within ±10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%"
+            totalObservationsString = f"Total: {len(df_test)} defects | Within ±10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%"
             tab3.markdown(totalObservationsString)
             # st.write()
             nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], df_test['NN Depth'])
@@ -86,7 +86,7 @@ def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MOD
             df_test = post_processing(df_test, data, "XGB", xgb_depth)
             within_spec = len(df_test[df_test['Depth Difference']<=10])
             tab4.dataframe(df_test)
-            totalObservationsString = f"Total: {len(df_test)} defects \n\n Within ±10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%"
+            totalObservationsString = f"Total: {len(df_test)} defects | Within ±10% Tolerance:{within_spec} -- {round(within_spec/len(df_test)*100)}%"
             tab3.markdown(totalObservationsString)
             # st.write()
             nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], df_test['XGB Depth'])
@@ -166,7 +166,7 @@ def modelTestingFilter(PULLTEST_DATASET_OPTIONS, ONNX_MODEL_OPTIONS, XGBOOST_MOD
             parsed_df = post_processing(parsed_df, data, "XGB", xgb_depth)
             within_spec = len(parsed_df[parsed_df['Depth Difference']<=10])
             tab4.dataframe(parsed_df.sort_values(by=['wt', 'Shape', 'Actual Depth']))
-            totalObservationsString = f"Total: {len(parsed_df)} defects \n\n Within ±10% Tolerance:{within_spec} -- {round(within_spec/len(parsed_df)*100)}%"
+            totalObservationsString = f"Total: {len(parsed_df)} defects | Within ±10% Tolerance:{within_spec} -- {round(within_spec/len(parsed_df)*100)}%"
             tab3.markdown(totalObservationsString)
             # st.write()
             nn_mae, nn_mse, nn_rmse = model_score(data['Actual Depth'], parsed_df['XGB Depth'])

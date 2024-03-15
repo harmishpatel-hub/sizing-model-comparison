@@ -38,8 +38,10 @@ def filter_columns(df, columns):
 
 def preprocess_shape_depth(df):
     df = df[df['Internal Comments'].notnull()]
+    # df = df[df['WT [in]'] != 0.688]
     df['Internal Comments'] = df['Internal Comments'].astype(str)
     df['Internal Comments'] = df['Internal Comments'].apply(lambda x: x.replace('-',''))
+    df['Internal Comments'] = df['Internal Comments'].apply(lambda x: x.replace('i',''))
     df['Internal Comments'] = df['Internal Comments'].astype(float).astype(int)
     df['Shape'] = df['Internal Comments'].apply(lambda x: str(x)[:-2])
     df['Shape'] = df['Shape'].astype(int)
