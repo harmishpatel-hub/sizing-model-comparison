@@ -28,7 +28,7 @@ def unity_plot(df, data, model_used, title_string, totalObservationsString, actu
         showarrow=False,
         font=dict(
             family="Courier New, monospace",
-            size=18,
+            size=12,
             color="#000000"
             ),
         bordercolor="#675c58",
@@ -42,5 +42,5 @@ def unity_plot(df, data, model_used, title_string, totalObservationsString, actu
                         string=f"{title_string} with {model_used}", 
                         col1=f"{actual_depth} (%)", 
                         col2=f"{model_used} Depth (%)", 
-                        tick=10, plotWidth=1000, plotHeight=800)
+                        tick=10, plotWidth=800, plotHeight=600)
     return fig

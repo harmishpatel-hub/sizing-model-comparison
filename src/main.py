@@ -6,6 +6,9 @@ from src.physicsFilter import physics
 
 import streamlit as st
 import os
+import warnings
+
+warnings.filterwarnings('ignore')
 
 def main():
     st.set_page_config(layout="wide")

@@ -14,7 +14,7 @@ def drawPhysicsChart(dataframe, colX, colY, colColor, tick=5):
         )
     fig.update_layout(
         title = f"""{colX.upper()} [in] VS {colY.upper()} [%] 
-        |       WT:{dataframe['wt'].unique()[0]} 
+        |       WT:{dataframe['wt'].unique()[0]} [in] 
         |       EXT/INT:{'EXTERNAL' if dataframe['Ext/Int'].unique()[0] == 1 else 'INTERNAL'} 
         |       PEAK VALUE:{dataframe['peak_value'].unique()[0]}""",
         width = 1000,
